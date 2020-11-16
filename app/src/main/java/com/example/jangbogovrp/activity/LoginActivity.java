@@ -13,6 +13,7 @@ import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.http.HttpService;
 import com.example.jangbogovrp.http.RetrofitClient;
 import com.example.jangbogovrp.model.User;
+import com.example.jangbogovrp.utils.Tools;
 import com.google.android.material.snackbar.Snackbar;
 
 import io.realm.Realm;
@@ -35,11 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView password = findViewById(R.id.password);
         ProgressBar progressBar = findViewById(R.id.progress_bar);
 
-        Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm realm = Realm.getInstance(config);
+        Realm realm = Tools.initRealm(this);
 
         HttpService httpService = RetrofitClient.getHttpService(null);
 
@@ -52,24 +49,23 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
-                        Log.d(TAG, "성공");
-                        User user = response.body();
+                        if(response.isSuccessful()){
+                            User user = response.body();
 
-                        if(user == null) {
-                            progressBar.setVisibility(View.GONE);
-                            Snackbar.make(parent_view, "ID, PASSWORD를 확인해주세요", Snackbar.LENGTH_SHORT).show();
-                            return;
+                            if(user == null) {
+                                progressBar.setVisibility(View.GONE);
+                                Snackbar.make(parent_view, "ID, PASSWORD를 확인해주세요", Snackbar.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            realm.beginTransaction();
+                            realm.copyToRealm(user);
+                            realm.commitTransaction();
+
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
                         }
-
-                        Log.d(TAG, user.getKey().toString());
-                        realm.beginTransaction();
-                        realm.copyToRealm(user);
-                        realm.commitTransaction();
-
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-
                     }
 
                     @Override
@@ -78,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "실패");
                     }
                 };
+
                 call.enqueue(callback);
             }
         });

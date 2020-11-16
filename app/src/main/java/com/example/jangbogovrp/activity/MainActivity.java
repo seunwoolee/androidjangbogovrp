@@ -9,32 +9,18 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.fragment.MainFragment;
 import com.example.jangbogovrp.fragment.MapsFragment;
-import com.example.jangbogovrp.http.HttpService;
-import com.example.jangbogovrp.http.RetrofitClient;
-import com.example.jangbogovrp.model.RouteD;
-import com.example.jangbogovrp.model.RouteDVO;
 import com.example.jangbogovrp.model.User;
 import com.example.jangbogovrp.utils.Tools;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.google.gson.Gson;
-
-import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
@@ -48,65 +34,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initToolbar();
         initComponent();
-        initRealm();
-        checkLogin();
-        initMapFragment();
-
-
-        User user = mRealm.where(User.class).findFirst();
-        HttpService httpService = RetrofitClient.getHttpService(user.getKey());
-        Call<List<RouteD>> call = httpService.getRouteDs();
-        Callback<List<RouteD>>callback = new Callback<List<RouteD>>() {
-            @Override
-            public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
-                Log.d(TAG, "성공");
-                String jsonString = response.body().toString();
-//                RouteD routeDVO = new Gson().fromJson(jsonString, RouteD.class);
-//                Log.d(TAG, String.valueOf(routeDVO));
-//                MovieListVO mMovieListVO = (MovieListVO) mGson.fromJson(result, MovieListVO.class)
-
-            }
-
-            @Override
-            public void onFailure(Call<List<RouteD>> call, Throwable t) {
-
-            }
-        };
-        call.enqueue(callback);
-
-        //        Call<User> call = httpService.login(username.getText().toString(), password.getText().toString());
-//        Callback<User> callback = new Callback<User>() {
-//
-//            @Override
-//            public void onResponse(Call<User> call, Response<User> response) {
-//                Log.d(TAG, "성공");
-//                User user = response.body();
-//
-//                if (user == null) {
-//                    progressBar.setVisibility(View.GONE);
-//                    Snackbar.make(parent_view, "ID, PASSWORD를 확인해주세요", Snackbar.LENGTH_SHORT).show();
-//                    return;
-//                }
-//
-//                Log.d(TAG, user.getKey().toString());
-//                realm.beginTransaction();
-//                realm.copyToRealm(user);
-//                realm.commitTransaction();
-//
-//                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                startActivity(intent);
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<User> call, Throwable t) {
-//                progressBar.setVisibility(View.GONE);
-//                Log.d(TAG, "실패");
-//            }
-//        };
-//        call.enqueue(callback);
-
+        mRealm = Tools.initRealm(this);
+        if (isLogin()) {
+            initMapFragment();
+        } else {
+            goToLogin();
+        }
     }
 
     private void goToLogin() {
@@ -115,21 +48,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void checkLogin() {
+    private boolean isLogin() {
         User user = mRealm.where(User.class).findFirst();
-        if (user == null) {
-            goToLogin();
-        }
-    }
-
-    private void initRealm() {
-        Realm.init(this);
-
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-
-        mRealm = Realm.getInstance(config);
+        return user != null;
     }
 
     private void initToolbar() {

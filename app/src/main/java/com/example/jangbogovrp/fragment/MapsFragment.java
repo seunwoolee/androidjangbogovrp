@@ -4,12 +4,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.jangbogovrp.R;
+import com.example.jangbogovrp.http.HttpService;
+import com.example.jangbogovrp.http.RetrofitClient;
+import com.example.jangbogovrp.model.RouteD;
+import com.example.jangbogovrp.model.User;
+import com.example.jangbogovrp.utils.Tools;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -17,7 +24,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.Realm;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MapsFragment extends Fragment {
+    private final String TAG = "MapsFragment";
+    private List<RouteD> mRouteDS = new ArrayList<RouteD>();
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -32,11 +49,43 @@ public class MapsFragment extends Fragment {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            LatLng sydney = new LatLng(-34, 151);
-            googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            Context context = getContext();
+            Realm realm = Tools.initRealm(context);
+
+            User user = realm.where(User.class).findFirst();
+            HttpService httpService = RetrofitClient.getHttpService(user.key);
+            Call<List<RouteD>> call = httpService.getRouteDs();
+            Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
+                @Override
+                public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
+                    Log.d(TAG, "성공");
+                    if (response.isSuccessful()) {
+                        mRouteDS = response.body();
+                        LatLng latLng = null;
+                        for (RouteD routed : mRouteDS) {
+                            latLng = new LatLng(routed.lat, routed.lon);
+                            googleMap.addMarker(new MarkerOptions().position(latLng).title(routed.name));
+                        }
+
+                        if (latLng != null) {
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14.0f));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<RouteD>> call, Throwable t) {
+
+                }
+            };
+            call.enqueue(callback);
         }
     };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Nullable
     @Override

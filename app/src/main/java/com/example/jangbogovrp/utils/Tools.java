@@ -49,6 +49,9 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class Tools {
 
     public static void setSystemBarColor(Activity act) {
@@ -467,5 +470,15 @@ public class Tools {
             }
             return url;
         }
+    }
+
+    public static Realm initRealm(Context context) {
+        Realm.init(context);
+
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        return Realm.getInstance(config);
     }
 }
