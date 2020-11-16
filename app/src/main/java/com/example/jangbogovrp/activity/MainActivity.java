@@ -125,14 +125,14 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MapsFragment mapsFragment = new MapsFragment();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.mainFragment, mapsFragment).commit();
+        transaction.replace(R.id.mainFragment, mapsFragment).commit();
     }
 
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainFragment mainFragment = new MainFragment();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.mainFragment, mainFragment).commit();
+        transaction.replace(R.id.mainFragment, mainFragment).commit();
     }
 
     private void switchFragment(int position) {
