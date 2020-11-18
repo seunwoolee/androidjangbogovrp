@@ -8,16 +8,10 @@
     android:background="@android:color/white"
     tools:context=".fragment.MainFragment">
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/grey_10" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -28,42 +22,11 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/spacing_xxlarge"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/mmdd"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="11월 18일"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                        android:textColor="@color/blue_grey_500"
-                        app:fontFamily="sans-serif-medium" />
-
-                    <View
-                        android:layout_width="@dimen/spacing_large"
-                        android:layout_height="2dp"
-                        android:layout_marginLeft="@dimen/spacing_middle"
-                        android:layout_marginRight="@dimen/spacing_middle"
-                        android:background="@color/grey_10" />
-
-                    <TextView
-                        android:id="@+id/weekday"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="수요일"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                        android:textColor="@color/grey_20" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/seq"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1번"
@@ -76,6 +39,7 @@
                         android:layout_height="0dp" />
 
                     <androidx.cardview.widget.CardView
+                        android:id="@+id/card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:cardBackgroundColor="@color/yellow_100"
@@ -115,7 +79,7 @@
                                         android:layout_marginTop="@dimen/spacing_large"
                                         android:text="138,200원"
                                         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                                        android:textColor="@color/grey_40" />
+                                        android:textColor="@color/grey_80" />
 
                                     <TextView
                                         android:id="@+id/address"
@@ -168,15 +132,9 @@
 
                             </LinearLayout>
 
-
                         </LinearLayout>
-
-
                     </androidx.cardview.widget.CardView>
-
                 </LinearLayout>
-
-
             </LinearLayout>
 
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
@@ -28,8 +30,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.skt.Tmap.TMapTapi;
 import com.skt.Tmap.TMapView;
 
+import org.w3c.dom.Text;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import retrofit2.Call;
@@ -45,8 +54,14 @@ public class MainFragment extends Fragment {
     private RecyclerView mRecyclerView;
     Realm mRealm;
 
+    private CustomerListAdapter.OnOrderBtnClickListener onOrderBtnClickListener = new CustomerListAdapter.OnOrderBtnClickListener() {
+        @Override
+        public void onBtnClick(String orderId) {
+            Log.d(TAG, String.valueOf(orderId));
+        }
+    };
+
     public MainFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -62,24 +77,33 @@ public class MainFragment extends Fragment {
         mContext = context;
     }
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ViewGroup root_view = (ViewGroup) inflater.inflate(R.layout.fragment_main, container, false);
+
+        DateFormat mmddFormat = new SimpleDateFormat("MM월dd일", Locale.KOREAN);
+        DateFormat weekdayFormat = new SimpleDateFormat("EEE요일", Locale.KOREAN);
+        Date date = new Date();
+
+        TextView mmdd = root_view.findViewById(R.id.mmdd);
+        TextView weekday = root_view.findViewById(R.id.weekday);
+
+        mmdd.setText(mmddFormat.format(date));
+        weekday.setText(weekdayFormat.format(date));
+
         mRecyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
-        if(mRouteDS.size() == 0) {
+        if (mRouteDS.size() == 0) {
             User user = mRealm.where(User.class).findFirst();
             HttpService httpService = RetrofitClient.getHttpService(user.key);
             Call<List<RouteD>> call = httpService.getRouteDs();
             Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
                 @Override
                 public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
-                    Log.d(TAG, "성공");
                     if (response.isSuccessful()) {
                         mRouteDS = response.body();
                         mAdapter = new CustomerListAdapter(mContext, mRouteDS);
+                        mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
                         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         mRecyclerView.setHasFixedSize(true);
                         mRecyclerView.setAdapter(mAdapter);
@@ -94,6 +118,7 @@ public class MainFragment extends Fragment {
             call.enqueue(callback);
         } else {
             mAdapter = new CustomerListAdapter(mContext, mRouteDS);
+            mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             mRecyclerView.setHasFixedSize(true);
             mRecyclerView.setAdapter(mAdapter);
@@ -108,4 +133,6 @@ public class MainFragment extends Fragment {
 //        linearLayoutTmap.addView(tMapView);
 
     }
+
+
 }

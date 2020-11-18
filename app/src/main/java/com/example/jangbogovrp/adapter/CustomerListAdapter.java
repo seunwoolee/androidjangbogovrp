@@ -11,6 +11,9 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jangbogovrp.R;
@@ -23,16 +26,10 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final String TAG = "CustomerListAdapter";
     private Context mContext;
     private List<RouteD> mRouteDs;
-    private OnItemClickListener mOnItemClickListener;
-    private OnCheckboxClickListener mOnCheckboxClickListener;
+    private OnOrderBtnClickListener mOnOrderBtnClickListener;
 
-    public void setOnCheckBoxClickListener(final OnCheckboxClickListener onCheckBoxClickListener) {
-        this.mOnCheckboxClickListener = onCheckBoxClickListener;
-    }
-
-
-    public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
-        this.mOnItemClickListener = mItemClickListener;
+    public void setOnOrderBtnClickListener(final OnOrderBtnClickListener onOrderBtnClickListener) {
+        mOnOrderBtnClickListener = onOrderBtnClickListener;
     }
 
     public CustomerListAdapter(Context context, List<RouteD> routeDs) {
@@ -40,23 +37,29 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         mContext = context;
     }
 
-    public class OriginalViewHolder extends RecyclerView.ViewHolder {
+    public static class OriginalViewHolder extends RecyclerView.ViewHolder {
+        public TextView seq;
         public TextView name;
         public TextView price;
         public TextView address;
         public Button detail;
         public View tmap;
+        public CardView cardView;
 
         public OriginalViewHolder(View v) {
             super(v);
+            seq = (TextView) v.findViewById(R.id.seq);
             name = (TextView) v.findViewById(R.id.name);
             price = (TextView) v.findViewById(R.id.price);
             address = (TextView) v.findViewById(R.id.address);
             detail = (Button) v.findViewById(R.id.detail);
             tmap = (ImageView) v.findViewById(R.id.tmap);
+            cardView = (CardView) v.findViewById(R.id.card);
+
         }
     }
 
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder vh;
@@ -66,36 +69,36 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    @SuppressLint("ResourceAsColor")
+    @SuppressLint({"ResourceAsColor", "DefaultLocale"})
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof OriginalViewHolder) {
             OriginalViewHolder view = (OriginalViewHolder) holder;
 
             RouteD routeD = mRouteDs.get(position);
+            view.seq.setText(String.format("%s번", String.valueOf(routeD.routeIndex)));
             view.name.setText(routeD.name);
-//            view.price.setText(routeD.price);
+            view.price.setText(String.format("%s원", String.format("%,d", routeD.price)));
             view.address.setText(routeD.address);
 
+            int color = R.color.yellow_100;
+            if (position % 4 == 1) {
+                color = R.color.green_100;
+            } else if (position % 4 == 2) {
+                color = R.color.blue_100;
+            } else if (position % 4 == 3) {
+                color = R.color.red_100;
+            }
+            view.cardView.setCardBackgroundColor(ContextCompat.getColor(mContext, color));
 
-//            view.checkBox.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if(mOnCheckboxClickListener != null){
-//                        mOnCheckboxClickListener.onItemClick(position);
-//                    }
-//                }
-//            });
-//
-//            view.lyt_parent.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    if (mOnItemClickListener != null) {
-//                        mOnItemClickListener.onItemClick(view, items.get(position), position);
-//                    }
-//                }
-//            });
-
+            view.detail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(mOnOrderBtnClickListener != null) {
+                        mOnOrderBtnClickListener.onBtnClick(routeD.orderId);
+                    }
+                }
+            });
         }
     }
 
@@ -104,8 +107,8 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return mRouteDs.size();
     }
 
-    public interface OnCheckboxClickListener {
-        void onItemClick(int pos);
+    public interface OnOrderBtnClickListener {
+        void onBtnClick(String orderId);
     }
 
     public interface OnItemClickListener {
