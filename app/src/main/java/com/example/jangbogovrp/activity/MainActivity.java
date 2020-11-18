@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -19,19 +20,48 @@ import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
 import com.example.jangbogovrp.fragment.MainFragment;
 import com.example.jangbogovrp.fragment.MapsFragment;
+import com.example.jangbogovrp.http.HttpService;
+import com.example.jangbogovrp.http.RetrofitClient;
+import com.example.jangbogovrp.model.RouteD;
 import com.example.jangbogovrp.model.User;
 import com.example.jangbogovrp.utils.Tools;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.realm.Realm;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
     private TabLayout tab_layout;
-//    private NestedScrollView nested_scroll_view;
     private Realm mRealm;
     private long mPressedTime;
+    private ArrayList mRouteDS;
+    private Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
+        @Override
+        public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
+            if (response.isSuccessful()) {
+                mRouteDS = (ArrayList) response.body();
 
+                if (isLogin()) {
+                    initMapFragment();
+                } else {
+                    goToLogin();
+                }
+
+            }
+        }
+
+        @Override
+        public void onFailure(Call<List<RouteD>> call, Throwable t) {
+
+        }
+    };
     @Override
     public void onBackPressed() {
         if (mPressedTime == 0) {
@@ -57,11 +87,10 @@ public class MainActivity extends AppCompatActivity {
         initToolbar();
         initComponent();
         mRealm = Tools.initRealm(this);
-        if (isLogin()) {
-            initMapFragment();
-        } else {
-            goToLogin();
-        }
+        User user = mRealm.where(User.class).findFirst();
+        HttpService httpService = RetrofitClient.getHttpService(user.key);
+        Call<List<RouteD>> call = httpService.getRouteDs();
+        call.enqueue(callback);
     }
 
     private void goToLogin() {
@@ -87,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
-//        nested_scroll_view = (NestedScrollView) findViewById(R.id.nested_scroll_view);
         tab_layout = (TabLayout) findViewById(R.id.tab_layout);
 
         tab_layout.addTab(tab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
@@ -146,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
     private void initMapFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MapsFragment mapsFragment = new MapsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("routeDs", mRouteDS);
+        mapsFragment.setArguments(bundle);
         Fragment fragment = fragmentManager.findFragmentByTag(MapsFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {
@@ -159,6 +190,9 @@ public class MainActivity extends AppCompatActivity {
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainFragment mainFragment = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("routeDs", mRouteDS);
+        mainFragment.setArguments(bundle);
         Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {

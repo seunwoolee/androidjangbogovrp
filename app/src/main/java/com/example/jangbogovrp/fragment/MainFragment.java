@@ -52,7 +52,6 @@ public class MainFragment extends Fragment {
     private CustomerListAdapter mAdapter;
     private List<RouteD> mRouteDS = new ArrayList<RouteD>();
     private RecyclerView mRecyclerView;
-    Realm mRealm;
 
     private CustomerListAdapter.OnOrderBtnClickListener onOrderBtnClickListener = new CustomerListAdapter.OnOrderBtnClickListener() {
         @Override
@@ -67,7 +66,8 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRealm = Tools.initRealm(mContext);
+        assert getArguments() != null;
+        mRouteDS = getArguments().getParcelableArrayList("routeDs");
         initTmap();
     }
 
@@ -93,36 +93,11 @@ public class MainFragment extends Fragment {
         weekday.setText(weekdayFormat.format(date));
 
         mRecyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
-        if (mRouteDS.size() == 0) {
-            User user = mRealm.where(User.class).findFirst();
-            HttpService httpService = RetrofitClient.getHttpService(user.key);
-            Call<List<RouteD>> call = httpService.getRouteDs();
-            Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
-                @Override
-                public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
-                    if (response.isSuccessful()) {
-                        mRouteDS = response.body();
-                        mAdapter = new CustomerListAdapter(mContext, mRouteDS);
-                        mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
-                        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        mRecyclerView.setHasFixedSize(true);
-                        mRecyclerView.setAdapter(mAdapter);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<List<RouteD>> call, Throwable t) {
-
-                }
-            };
-            call.enqueue(callback);
-        } else {
-            mAdapter = new CustomerListAdapter(mContext, mRouteDS);
-            mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            mRecyclerView.setHasFixedSize(true);
-            mRecyclerView.setAdapter(mAdapter);
-        }
+        mAdapter = new CustomerListAdapter(mContext, mRouteDS);
+        mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mAdapter);
 
         return root_view;
     }
@@ -130,8 +105,6 @@ public class MainFragment extends Fragment {
     private void initTmap() {
         mTmap = new TMapTapi(mContext);
         mTmap.setSKTMapAuthentication("0de9ecde-b87c-404c-b7f8-be4ed7b85d4f");
-//        linearLayoutTmap.addView(tMapView);
-
     }
 
 
