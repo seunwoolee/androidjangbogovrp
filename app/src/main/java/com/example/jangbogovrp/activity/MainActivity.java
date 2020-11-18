@@ -3,12 +3,14 @@ package com.example.jangbogovrp.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -27,6 +29,25 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tab_layout;
     private NestedScrollView nested_scroll_view;
     private Realm mRealm;
+    private long mPressedTime;
+
+    @Override
+    public void onBackPressed() {
+        if (mPressedTime == 0) {
+            Toast.makeText(MainActivity.this, " 한 번 더 누르면 종료됩니다.", Toast.LENGTH_LONG).show();
+            mPressedTime = System.currentTimeMillis();
+        } else {
+            int seconds = (int) (System.currentTimeMillis() - mPressedTime);
+
+            if (seconds > 2000) {
+                Toast.makeText(MainActivity.this, " 한 번 더 누르면 종료됩니다.", Toast.LENGTH_LONG).show();
+                mPressedTime = 0;
+            } else {
+                super.onBackPressed();
+                finish();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,15 +145,27 @@ public class MainActivity extends AppCompatActivity {
     private void initMapFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MapsFragment mapsFragment = new MapsFragment();
+        Fragment fragment = fragmentManager.findFragmentByTag(MapsFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.mainFragment, mapsFragment).commit();
+        if (fragment != null) {
+            transaction.replace(R.id.mainFragment, fragment, MapsFragment.class.getName()).commit();
+            return;
+        }
+
+        transaction.add(R.id.mainFragment, mapsFragment, MapsFragment.class.getName()).addToBackStack(null).commit();
     }
 
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainFragment mainFragment = new MainFragment();
+        Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.mainFragment, mainFragment).commit();
+        if (fragment != null) {
+            transaction.replace(R.id.mainFragment, fragment, MapsFragment.class.getName()).commit();
+            return;
+        }
+
+        transaction.add(R.id.mainFragment, mainFragment, "main").addToBackStack(null).commit();
     }
 
     private void switchFragment(int position) {
@@ -145,4 +178,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
+
 }
