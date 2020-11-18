@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.jangbogovrp.R;
+import com.example.jangbogovrp.adapter.CustomerListAdapter;
 import com.example.jangbogovrp.fragment.MainFragment;
 import com.example.jangbogovrp.fragment.MapsFragment;
 import com.example.jangbogovrp.model.User;
@@ -27,7 +28,7 @@ import io.realm.Realm;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
     private TabLayout tab_layout;
-    private NestedScrollView nested_scroll_view;
+//    private NestedScrollView nested_scroll_view;
     private Realm mRealm;
     private long mPressedTime;
 
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
-        nested_scroll_view = (NestedScrollView) findViewById(R.id.nested_scroll_view);
+//        nested_scroll_view = (NestedScrollView) findViewById(R.id.nested_scroll_view);
         tab_layout = (TabLayout) findViewById(R.id.tab_layout);
 
         tab_layout.addTab(tab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
@@ -161,11 +162,11 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {
-            transaction.replace(R.id.mainFragment, fragment, MapsFragment.class.getName()).commit();
+            transaction.replace(R.id.mainFragment, fragment, MainFragment.class.getName()).commit();
             return;
         }
 
-        transaction.add(R.id.mainFragment, mainFragment, "main").addToBackStack(null).commit();
+        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(null).commit();
     }
 
     private void switchFragment(int position) {

@@ -13,4 +13,8 @@ public class RouteD {
     public double lon;
     @SerializedName("name")
     public String name;
+    @SerializedName("price")
+    public int price;
+    @SerializedName("address")
+    public String address;
 }
