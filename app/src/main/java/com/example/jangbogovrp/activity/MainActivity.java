@@ -32,8 +32,11 @@ import com.example.jangbogovrp.http.RetrofitClient;
 import com.example.jangbogovrp.model.RouteD;
 import com.example.jangbogovrp.model.User;
 import com.example.jangbogovrp.utils.Tools;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     private final IsAmButtonClicked isAmButtonClicked = new IsAmButtonClicked() {
         @Override
         public void buttonClicked() {
@@ -120,6 +124,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String token = task.getResult();
+
+                        // Log and toast
+                        Log.d(TAG, token);
+                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
         initToolbar();
         initComponent();
         initDrawerMenu();

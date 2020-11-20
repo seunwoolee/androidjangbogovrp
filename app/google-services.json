@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "399545453666",
+    "firebase_url": "https://jangbogovrp.firebaseio.com",
+    "project_id": "jangbogovrp",
+    "storage_bucket": "jangbogovrp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399545453666:android:468bb302129b0be155d53b",
+        "android_client_info": {
+          "package_name": "com.example.jangbogovrp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399545453666-ojf4854797r69fd1gq8hdm678j8utrqp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.jangbogovrp",
+            "certificate_hash": "a218d20b1aeb6a6a019f86e8cd8ebdd4810f328d"
+          }
+        },
+        {
+          "client_id": "399545453666-k1b0oc2ua82325sh61phvtdgglhs43as.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLPvQJcHuHcJBkQ3xeIG9_FeRE55p1X2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399545453666-k1b0oc2ua82325sh61phvtdgglhs43as.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

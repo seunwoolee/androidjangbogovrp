@@ -13,8 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.jangbogovrp.R;
+import com.example.jangbogovrp.activity.MainActivity;
 import com.example.jangbogovrp.http.HttpService;
 import com.example.jangbogovrp.http.RetrofitClient;
 import com.example.jangbogovrp.model.RouteD;
@@ -73,6 +75,9 @@ public class MapsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         assert getArguments() != null;
         mRouteDS = getArguments().getParcelableArrayList("routeDs");
+        if(mRouteDS.size() == 0) {
+            Toast.makeText(getContext(), "배송 데이터가 없습니다.", Toast.LENGTH_LONG).show();
+        }
         isAm = getArguments().getBoolean("isAm");
     }
 
