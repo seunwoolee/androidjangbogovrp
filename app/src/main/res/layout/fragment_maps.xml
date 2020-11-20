@@ -9,6 +9,7 @@
     tools:context=".fragment.MapsFragment" >
 
     <Button
+        android:theme="@style/Button.Primary"
         android:id="@+id/isAm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

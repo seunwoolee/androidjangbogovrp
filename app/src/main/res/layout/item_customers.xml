@@ -27,9 +27,9 @@
 
                     <TextView
                         android:id="@+id/seq"
-                        android:layout_width="wrap_content"
+                        android:layout_width="15dp"
                         android:layout_height="wrap_content"
-                        android:text="1번"
+                        android:text="1"
                         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                         android:textColor="@color/blue_grey_500"
                         app:fontFamily="sans-serif-medium" />

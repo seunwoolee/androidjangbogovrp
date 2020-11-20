@@ -49,15 +49,10 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
+                        progressBar.setVisibility(View.GONE);
+
                         if(response.isSuccessful()){
                             User user = response.body();
-
-                            if(user == null) {
-                                progressBar.setVisibility(View.GONE);
-                                Snackbar.make(parent_view, "ID, PASSWORD를 확인해주세요", Snackbar.LENGTH_SHORT).show();
-                                return;
-                            }
-
                             realm.beginTransaction();
                             realm.copyToRealm(user);
                             realm.commitTransaction();
@@ -65,7 +60,10 @@ public class LoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
+                        } else {
+                            Snackbar.make(parent_view, "ID, PASSWORD를 확인해주세요", Snackbar.LENGTH_SHORT).show();
                         }
+
                     }
 
                     @Override

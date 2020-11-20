@@ -5,11 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.http.HttpService;
@@ -22,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -36,9 +40,10 @@ public class MapsFragment extends Fragment {
     private final String TAG = "MapsFragment";
     private List<RouteD> mRouteDS = new ArrayList<RouteD>();
     private boolean isDrawn = false;
-
+    private boolean isAm = true;
+    private IsAmButtonClicked isAmButtonClicked;
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
-       @Override
+        @Override
         public void onMapReady(GoogleMap googleMap) {
             if (!isDrawn) {
                 LatLng latLng = null;
@@ -55,11 +60,20 @@ public class MapsFragment extends Fragment {
         }
     };
 
+    public void setIsAmButtonClicked(IsAmButtonClicked isAmButtonClicked) {
+        this.isAmButtonClicked = isAmButtonClicked;
+    }
+
+    public interface IsAmButtonClicked {
+        void buttonClicked();
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         assert getArguments() != null;
         mRouteDS = getArguments().getParcelableArrayList("routeDs");
+        isAm = getArguments().getBoolean("isAm");
     }
 
     @Nullable
@@ -67,8 +81,22 @@ public class MapsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        ViewGroup root_view = (ViewGroup) inflater.inflate(R.layout.fragment_maps, container, false);
+        Button button = root_view.findViewById(R.id.isAm);
 
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        if (isAm) {
+            button.setText("오전");
+        } else {
+            button.setText("오후");
+        }
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isAmButtonClicked.buttonClicked();
+            }
+        });
+        return root_view;
     }
 
     @Override

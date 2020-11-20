@@ -1,5 +1,6 @@
 package com.example.jangbogovrp.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,6 +26,7 @@ import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
 import com.example.jangbogovrp.fragment.MainFragment;
 import com.example.jangbogovrp.fragment.MapsFragment;
+import com.example.jangbogovrp.fragment.MapsFragment.IsAmButtonClicked;
 import com.example.jangbogovrp.http.HttpService;
 import com.example.jangbogovrp.http.RetrofitClient;
 import com.example.jangbogovrp.model.RouteD;
@@ -36,38 +38,63 @@ import com.google.android.material.tabs.TabLayout;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
+
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
     private TabLayout tab_layout;
     private DrawerLayout drawer;
     private Toolbar toolbar;
-    private View navigation_header;
+    private boolean isAm = true;
 
     private Realm mRealm;
     private long mPressedTime;
     private ArrayList mRouteDS;
-    private Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
+    HttpService mHttpService;
+    private final Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
         @Override
         public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
             if (response.isSuccessful()) {
                 mRouteDS = (ArrayList) response.body();
-                if (isLogin()) {
-                    initMapFragment();
-                } else {
-                    goToLogin();
-                }
+                initMapFragment();
             }
         }
 
         @Override
         public void onFailure(Call<List<RouteD>> call, Throwable t) {
 
+        }
+    };
+    private final Callback<List<RouteD>> reLoadCallback = new Callback<List<RouteD>>() {
+        @Override
+        public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
+            if (response.isSuccessful()) {
+                mRouteDS = (ArrayList) response.body();
+                reloadMapFragment();
+
+            }
+        }
+
+        @Override
+        public void onFailure(Call<List<RouteD>> call, Throwable t) {
+
+        }
+    };
+
+    private final IsAmButtonClicked isAmButtonClicked = new IsAmButtonClicked() {
+        @Override
+        public void buttonClicked() {
+            isAm = !isAm;
+            Call<List<RouteD>> call = mHttpService.getRouteDs(isAm);
+            call.enqueue(reLoadCallback);
         }
     };
 
@@ -98,8 +125,14 @@ public class MainActivity extends AppCompatActivity {
         initDrawerMenu();
         mRealm = Tools.initRealm(this);
         User user = mRealm.where(User.class).findFirst();
-        HttpService httpService = RetrofitClient.getHttpService(user.key);
-        Call<List<RouteD>> call = httpService.getRouteDs();
+
+        if (!isLogin()) {
+            goToLogin();
+            return;
+        }
+
+        mHttpService = RetrofitClient.getHttpService(user.key);
+        Call<List<RouteD>> call = mHttpService.getRouteDs(isAm);
         call.enqueue(callback);
     }
 
@@ -113,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
         User user = mRealm.where(User.class).findFirst();
         return user != null;
     }
-
 
     private void initToolbar() {
         toolbar = findViewById(R.id.toolbar);
@@ -139,29 +171,34 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
         nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(final MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
                 int item_id = item.getItemId();
-                if (item_id == R.id.action_notifications) {
 
-                } else if (item_id == R.id.action_rate) {
-//                    Tools.rateAction(MainMenu.this);
-                } else if (item_id == R.id.action_about) {
-//                    showDialogAbout();
+                if (item_id == R.id.logout) {
+                    mRealm.beginTransaction();
+                    mRealm.where(User.class).findAll().deleteAllFromRealm();
+                    mRealm.commitTransaction();
+                    goToLogin();
+                } else if (item_id == R.id.exit) {
+                    finish();
                 }
+
                 return true;
             }
+
+
         });
 
-        // navigation header
-        navigation_header = nav_view.getHeaderView(0);
-
-        TextView tv_new_version = (TextView) navigation_header.findViewById(R.id.tv_new_version);
-        tv_new_version.setVisibility(View.GONE);
+//        // navigation header
+//        navigation_header = nav_view.getHeaderView(0);
+//
+//        TextView tv_new_version = (TextView) navigation_header.findViewById(R.id.tv_new_version);
+//        tv_new_version.setVisibility(View.GONE);
     }
 
 
     private void initComponent() {
-        tab_layout = (TabLayout) findViewById(R.id.tab_layout);
+        tab_layout = findViewById(R.id.tab_layout);
 
         tab_layout.addTab(tab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
         tab_layout.addTab(tab_layout.newTab().setIcon(R.drawable.ic_credit_card), 1);
@@ -200,12 +237,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         CharSequence title = item.getTitle();
-        if ("logout".equals(title)) {
-            mRealm.beginTransaction();
-            mRealm.where(User.class).findAll().deleteAllFromRealm();
-            mRealm.commitTransaction();
-            goToLogin();
-        } else if ("start".equals(title)) {
+        if ("start".contentEquals(title)) {
             Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
         } else if (item.getItemId() == android.R.id.home) {
             finish();
@@ -218,19 +250,37 @@ public class MainActivity extends AppCompatActivity {
 
     private void initMapFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        MapsFragment mapsFragment = new MapsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("routeDs", mRouteDS);
-        mapsFragment.setArguments(bundle);
+        MapsFragment mapsFragment = getMapsFragment();
         Fragment fragment = fragmentManager.findFragmentByTag(MapsFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
+
         if (fragment != null) {
             transaction.replace(R.id.mainFragment, fragment, MapsFragment.class.getName()).commit();
             return;
         }
 
-        transaction.add(R.id.mainFragment, mapsFragment, MapsFragment.class.getName()).addToBackStack(null).commit();
+        transaction.add(R.id.mainFragment, mapsFragment, MapsFragment.class.getName()).addToBackStack(MapsFragment.class.getName()).commit();
     }
+
+    private void reloadMapFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack(MapsFragment.class.getName(), POP_BACK_STACK_INCLUSIVE);
+        MapsFragment mapsFragment = getMapsFragment();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.mainFragment, mapsFragment, MapsFragment.class.getName()).addToBackStack(MapsFragment.class.getName()).commit();
+    }
+
+
+    private MapsFragment getMapsFragment() {
+        MapsFragment mapsFragment = new MapsFragment();
+        mapsFragment.setIsAmButtonClicked(isAmButtonClicked);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isAm", isAm);
+        bundle.putParcelableArrayList("routeDs", mRouteDS);
+        mapsFragment.setArguments(bundle);
+        return mapsFragment;
+    }
+
 
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -245,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(null).commit();
+        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
     }
 
     private void switchFragment(int position) {
@@ -258,6 +308,4 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-
-
 }

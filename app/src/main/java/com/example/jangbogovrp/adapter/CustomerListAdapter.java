@@ -25,7 +25,7 @@ import java.util.List;
 public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "CustomerListAdapter";
     private Context mContext;
-    private List<RouteD> mRouteDs;
+    private List<RouteD> mRouteDs = new ArrayList<RouteD>();
     private OnOrderBtnClickListener mOnOrderBtnClickListener;
 
     public void setOnOrderBtnClickListener(final OnOrderBtnClickListener onOrderBtnClickListener) {
@@ -76,7 +76,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             OriginalViewHolder view = (OriginalViewHolder) holder;
 
             RouteD routeD = mRouteDs.get(position);
-            view.seq.setText(String.format("%s번", String.valueOf(routeD.routeIndex)));
+            view.seq.setText(String.format("%s", String.valueOf(routeD.routeIndex)));
             view.name.setText(routeD.name);
             view.price.setText(String.format("%s원", String.format("%,d", routeD.price)));
             view.address.setText(routeD.address);

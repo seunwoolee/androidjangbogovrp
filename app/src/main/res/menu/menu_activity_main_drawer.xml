@@ -7,23 +7,12 @@
         android:checkableBehavior="none">
 
         <item
-            android:id="@+id/action_notifications"
-            android:title="Notification"
+            android:id="@+id/logout"
+            android:title="로그아웃"
             app:actionLayout="@layout/badge_navigation_dot" />
         <item
-            android:id="@+id/action_portfolio"
-            android:title="Other Apps" />
-        <item
-            android:id="@+id/action_rate"
-            android:orderInCategory="100"
-            android:title="Rate this app"
-            app:showAsAction="never" />
-
-        <item
-            android:id="@+id/action_about"
-            android:orderInCategory="100"
-            android:title="About"
-            app:showAsAction="never" />
+            android:id="@+id/exit"
+            android:title="종료" />
 
     </group>
 
