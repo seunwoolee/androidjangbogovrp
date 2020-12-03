@@ -43,7 +43,7 @@
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/spacing_xxlarge"
-            android:background="@color/blue_grey_800"
+            android:background="@color/quantum_black_100"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:tabIndicatorHeight="0dp"
             app:tabMode="fixed"

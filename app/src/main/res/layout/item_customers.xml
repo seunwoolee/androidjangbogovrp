@@ -27,7 +27,7 @@
 
                     <TextView
                         android:id="@+id/seq"
-                        android:layout_width="15dp"
+                        android:layout_width="20dp"
                         android:layout_height="wrap_content"
                         android:text="1"
                         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
@@ -126,7 +126,7 @@
                                     android:layout_width="@dimen/spacing_xmlarge"
                                     android:layout_height="@dimen/spacing_xmlarge"
                                     android:padding="@dimen/spacing_middle"
-                                    app:srcCompat="@drawable/ic_subject"
+                                    app:srcCompat="@drawable/ic_directions_car"
                                     app:tint="@color/grey_60"
                                     tools:ignore="VectorDrawableCompat" />
 

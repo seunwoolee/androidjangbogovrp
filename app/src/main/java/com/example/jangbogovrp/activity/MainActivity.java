@@ -4,16 +4,22 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jangbogovrp.BuildConfig;
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
 import com.example.jangbogovrp.fragment.MainFragment;
@@ -53,6 +60,12 @@ import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
+    private static final String[] needPermissions = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+    private static final int REQUEST_LOCATION_PERMISSION = 200;
+
     private TabLayout tab_layout;
     private DrawerLayout drawer;
     private Toolbar toolbar;
@@ -92,6 +105,49 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public void requestPermission() {
+        for (String permission : needPermissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        needPermissions,
+                        REQUEST_LOCATION_PERMISSION);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean permissionToRecordAccepted = true;
+
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    permissionToRecordAccepted = false;
+                    break;
+                }
+            }
+        }
+
+        if (!permissionToRecordAccepted) {
+            Toast.makeText(MainActivity.this, "권한이 거부되었습니다. 권한을 승인해주세요.", Toast.LENGTH_LONG).show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent();
+                    intent.setAction(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package",
+                            BuildConfig.APPLICATION_ID, null);
+                    intent.setData(uri);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }, 1500);
+        }
+    }
 
     private final IsAmButtonClicked isAmButtonClicked = new IsAmButtonClicked() {
         @Override
@@ -124,27 +180,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-
-                        // Get new FCM registration token
-                        String token = task.getResult();
-
-                        // Log and toast
-                        Log.d(TAG, token);
-                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
+        requestPermission();
         initToolbar();
         initComponent();
         initDrawerMenu();
@@ -229,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
         tab_layout.addTab(tab_layout.newTab().setIcon(R.drawable.ic_credit_card), 1);
 
         // set icon color pre-selected
-        tab_layout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+        tab_layout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.quantum_white_100), PorterDuff.Mode.SRC_IN);
         tab_layout.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_700), PorterDuff.Mode.SRC_IN);
 //
         tab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -237,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
                 switchFragment(position);
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.quantum_white_100), PorterDuff.Mode.SRC_IN);
             }
 
             @Override

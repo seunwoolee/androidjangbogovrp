@@ -2,9 +2,14 @@ package com.example.jangbogovrp.fragment;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -22,6 +27,7 @@ import com.example.jangbogovrp.http.RetrofitClient;
 import com.example.jangbogovrp.model.RouteD;
 import com.example.jangbogovrp.model.User;
 import com.example.jangbogovrp.utils.Tools;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,14 +35,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MapsFragment extends Fragment {
     private final String TAG = "MapsFragment";
@@ -48,16 +59,30 @@ public class MapsFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             if (!isDrawn) {
-                LatLng latLng = null;
                 for (RouteD routed : mRouteDS) {
-                    latLng = new LatLng(routed.lat, routed.lon);
+                    LatLng latLng = new LatLng(routed.lat, routed.lon);
                     googleMap.addMarker(new MarkerOptions().position(latLng).title(routed.name));
                 }
 
-                if (latLng != null) {
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14.0f));
-                    isDrawn = true;
+                Context context = getContext();
+                assert context != null;
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                {
+                    return;
                 }
+                googleMap.setMyLocationEnabled(true);
+                googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+                isDrawn = true;
+
+                FusedLocationProviderClient fusedLocationProviderClient = new FusedLocationProviderClient(context);
+                Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
+                locationTask.addOnSuccessListener(location -> {
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getAltitude());
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
+                });
+
+
             }
         }
     };
@@ -75,7 +100,7 @@ public class MapsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         assert getArguments() != null;
         mRouteDS = getArguments().getParcelableArrayList("routeDs");
-        if(mRouteDS.size() == 0) {
+        if (mRouteDS.size() == 0) {
             Toast.makeText(getContext(), "배송 데이터가 없습니다.", Toast.LENGTH_LONG).show();
         }
         isAm = getArguments().getBoolean("isAm");
