@@ -1,9 +1,11 @@
 package com.example.jangbogovrp.http;
 
 
+import com.example.jangbogovrp.model.OrderDetail;
 import com.example.jangbogovrp.model.RouteD;
 import com.example.jangbogovrp.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -19,6 +21,9 @@ public interface HttpService {
 //    })
     @GET("/delivery/android_routeD/")
     Call<List<RouteD>> getRouteDs(@Query("isAm") boolean isAm);
+
+    @GET("/customer/get_orders/")
+    Call<List<OrderDetail>> getDetailOrders(@Query("order_ids[]") ArrayList<String> orderIds);
 
     @FormUrlEncoded
     @POST("/rest-auth/login/")

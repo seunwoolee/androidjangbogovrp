@@ -78,8 +78,10 @@ public class MapsFragment extends Fragment {
                 FusedLocationProviderClient fusedLocationProviderClient = new FusedLocationProviderClient(context);
                 Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
                 locationTask.addOnSuccessListener(location -> {
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getAltitude());
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
+                    if(location != null){
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getAltitude());
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
+                    }
                 });
 
 

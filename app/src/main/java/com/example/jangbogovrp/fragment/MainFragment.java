@@ -1,11 +1,12 @@
 package com.example.jangbogovrp.fragment;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,34 +14,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
+import com.example.jangbogovrp.adapter.OrderDetailAdapter;
 import com.example.jangbogovrp.http.HttpService;
-import com.example.jangbogovrp.http.RetrofitClient;
+import com.example.jangbogovrp.model.OrderDetail;
 import com.example.jangbogovrp.model.RouteD;
-import com.example.jangbogovrp.model.User;
-import com.example.jangbogovrp.utils.Tools;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.skt.Tmap.TMapTapi;
-import com.skt.Tmap.TMapView;
-
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,18 +40,56 @@ public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
     private TMapTapi mTmap;
     private Context mContext;
-    private CustomerListAdapter mAdapter;
     private List<RouteD> mRouteDS = new ArrayList<RouteD>();
-    private RecyclerView mRecyclerView;
+    private List<OrderDetail> mOrderDetails = new ArrayList<OrderDetail>();
+    private HttpService mHttpService;
 
     private CustomerListAdapter.OnOrderBtnClickListener onOrderBtnClickListener = new CustomerListAdapter.OnOrderBtnClickListener() {
         @Override
         public void onBtnClick(String orderId) {
-            Log.d(TAG, String.valueOf(orderId));
+            ArrayList<String> orderIds = new ArrayList<String>();
+            orderIds.add(orderId);
+
+            Call<List<OrderDetail>> call = mHttpService.getDetailOrders(orderIds);
+            call.enqueue(new Callback<List<OrderDetail>>() {
+                @Override
+                public void onResponse(Call<List<OrderDetail>> call, Response<List<OrderDetail>> response) {
+                    if (response.isSuccessful()) {
+                        mOrderDetails = (ArrayList<OrderDetail>) response.body();
+                        showOrderDetailDialog((ArrayList<OrderDetail>) mOrderDetails);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<OrderDetail>> call, Throwable t) {
+
+                }
+            });
         }
     };
 
-    public MainFragment() {
+    private void showOrderDetailDialog(ArrayList<OrderDetail> orderDetails) {
+//        final Dialog dialog = new Dialog(mContext, R.style.MyDialogTheme);
+        final Dialog dialog = new Dialog(mContext);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_order_detail);
+        RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.recyclerView);
+
+//        CustomerListAdapter mAdapter = new CustomerListAdapter(mContext, mRouteDS);
+        OrderDetailAdapter adapter = new OrderDetailAdapter(mContext, orderDetails);
+//        mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+
+
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setCancelable(true);
+        dialog.show();
+    }
+
+    public MainFragment(HttpService httpService) {
+        mHttpService = httpService;
     }
 
     @Override
@@ -92,8 +121,8 @@ public class MainFragment extends Fragment {
         mmdd.setText(mmddFormat.format(date));
         weekday.setText(weekdayFormat.format(date));
 
-        mRecyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
-        mAdapter = new CustomerListAdapter(mContext, mRouteDS);
+        RecyclerView mRecyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
+        CustomerListAdapter mAdapter = new CustomerListAdapter(mContext, mRouteDS);
         mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setHasFixedSize(true);

@@ -73,13 +73,13 @@ public class MainActivity extends AppCompatActivity {
 
     private Realm mRealm;
     private long mPressedTime;
-    private ArrayList mRouteDS;
-    HttpService mHttpService;
+    private ArrayList<RouteD> mRouteDS;
+    private HttpService mHttpService;
     private final Callback<List<RouteD>> callback = new Callback<List<RouteD>>() {
         @Override
         public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
             if (response.isSuccessful()) {
-                mRouteDS = (ArrayList) response.body();
+                mRouteDS = (ArrayList<RouteD>) response.body();
                 initMapFragment();
             }
         }
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        MainFragment mainFragment = new MainFragment();
+        MainFragment mainFragment = new MainFragment(mHttpService);
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("routeDs", mRouteDS);
         mainFragment.setArguments(bundle);
