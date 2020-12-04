@@ -122,13 +122,15 @@
                                     android:layout_weight="1" />
 
                                 <ImageView
+                                    android:clickable="true"
                                     android:id="@+id/tmap"
                                     android:layout_width="@dimen/spacing_xmlarge"
                                     android:layout_height="@dimen/spacing_xmlarge"
                                     android:padding="@dimen/spacing_middle"
                                     app:srcCompat="@drawable/ic_directions_car"
                                     app:tint="@color/grey_60"
-                                    tools:ignore="VectorDrawableCompat" />
+                                    tools:ignore="VectorDrawableCompat"
+                                    android:focusable="true" />
 
                             </LinearLayout>
 

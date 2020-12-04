@@ -14,7 +14,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
 <!--        <androidx.cardview.widget.CardView-->
@@ -48,8 +48,8 @@
                 android:id="@+id/productName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLines="3"
-                android:text="#깐양파 10KG/ 국산"
+                android:maxLines="2"
+                android:text="#깐양파 10KG/ 국산깐양파 10KG/ 국산깐양파 10KG/ 국산깐양파 10KG/ 국산깐양파 10KG/ 국산깐양파 10KG/ 국산깐양파 10KG/ 국산"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:textColor="@color/grey_80"
                 app:fontFamily="sans-serif-medium" />
@@ -72,7 +72,7 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                     android:textColor="@color/grey_40"
                     app:fontFamily="sans-serif-medium" />
-
+`
                 <View
                     android:layout_width="0dp"
                     android:layout_height="0dp"

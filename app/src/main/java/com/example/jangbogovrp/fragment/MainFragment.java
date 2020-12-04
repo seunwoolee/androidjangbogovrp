@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.adapter.CustomerListAdapter;
@@ -68,16 +69,24 @@ public class MainFragment extends Fragment {
         }
     };
 
+    private CustomerListAdapter.OnTmapBtnClickListener onTmapBtnClickListener = new CustomerListAdapter.OnTmapBtnClickListener() {
+        @Override
+        public void onItemClick(RouteD obj) {
+            if(!mTmap.isTmapApplicationInstalled()) {
+                Toast.makeText(mContext, "Tmap을 설치해주세요", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            mTmap.invokeRoute(obj.address, (float) obj.lon, (float) obj.lat);
+        }
+    };
+
     private void showOrderDetailDialog(ArrayList<OrderDetail> orderDetails) {
-//        final Dialog dialog = new Dialog(mContext, R.style.MyDialogTheme);
         final Dialog dialog = new Dialog(mContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_order_detail);
         RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.recyclerView);
 
-//        CustomerListAdapter mAdapter = new CustomerListAdapter(mContext, mRouteDS);
         OrderDetailAdapter adapter = new OrderDetailAdapter(mContext, orderDetails);
-//        mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
@@ -97,6 +106,9 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         assert getArguments() != null;
         mRouteDS = getArguments().getParcelableArrayList("routeDs");
+        if (mRouteDS.size() == 0) {
+            Toast.makeText(getContext(), "배송 데이터가 없습니다.", Toast.LENGTH_LONG).show();
+        }
         initTmap();
     }
 
@@ -124,6 +136,8 @@ public class MainFragment extends Fragment {
         RecyclerView mRecyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
         CustomerListAdapter mAdapter = new CustomerListAdapter(mContext, mRouteDS);
         mAdapter.setOnOrderBtnClickListener(onOrderBtnClickListener);
+        mAdapter.setOnTmapBtnClickListener(onTmapBtnClickListener);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);

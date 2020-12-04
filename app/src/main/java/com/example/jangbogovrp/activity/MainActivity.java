@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         public void onResponse(Call<List<RouteD>> call, Response<List<RouteD>> response) {
             if (response.isSuccessful()) {
                 mRouteDS = (ArrayList<RouteD>) response.body();
-                initMapFragment();
+                initMainFragment();
             }
         }
 
@@ -224,11 +224,9 @@ public class MainActivity extends AppCompatActivity {
         drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             public void onDrawerOpened(View drawerView) {
-//                updateCounter(nav_view);
                 super.onDrawerOpened(drawerView);
             }
         };
-//        drawer.setDrawerListener(toggle);
         toggle.syncState();
         nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -249,14 +247,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
-
-//        // navigation header
-//        navigation_header = nav_view.getHeaderView(0);
-//
-//        TextView tv_new_version = (TextView) navigation_header.findViewById(R.id.tv_new_version);
-//        tv_new_version.setVisibility(View.GONE);
     }
-
 
     private void initComponent() {
         tab_layout = findViewById(R.id.tab_layout);
@@ -362,10 +353,10 @@ public class MainActivity extends AppCompatActivity {
     private void switchFragment(int position) {
         switch (position) {
             case 0:
-                initMapFragment();
+                initMainFragment();
                 break;
             case 1:
-                initMainFragment();
+                initMapFragment();
                 break;
         }
     }

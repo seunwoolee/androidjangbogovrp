@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jangbogovrp.R;
 import com.example.jangbogovrp.model.RouteD;
+import com.skt.Tmap.TMapTapi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +28,14 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Context mContext;
     private List<RouteD> mRouteDs = new ArrayList<RouteD>();
     private OnOrderBtnClickListener mOnOrderBtnClickListener;
+    private OnTmapBtnClickListener mOnTmapBtnClickListener;
 
     public void setOnOrderBtnClickListener(final OnOrderBtnClickListener onOrderBtnClickListener) {
         mOnOrderBtnClickListener = onOrderBtnClickListener;
+    }
+
+    public void setOnTmapBtnClickListener(final OnTmapBtnClickListener onTmapBtnClickListener) {
+        mOnTmapBtnClickListener = onTmapBtnClickListener;
     }
 
     public CustomerListAdapter(Context context, List<RouteD> routeDs) {
@@ -99,6 +105,14 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     }
                 }
             });
+            view.tmap.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(mOnTmapBtnClickListener != null) {
+                        mOnTmapBtnClickListener.onItemClick(routeD);
+                    }
+                }
+            });
         }
     }
 
@@ -111,8 +125,8 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         void onBtnClick(String orderId);
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(View view, RouteD obj, int pos);
+    public interface OnTmapBtnClickListener {
+        void onItemClick(RouteD obj);
     }
 
 }
