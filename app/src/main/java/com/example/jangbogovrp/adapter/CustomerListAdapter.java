@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jangbogovrp.R;
+import com.example.jangbogovrp.http.HttpService;
 import com.example.jangbogovrp.model.RouteD;
 import com.skt.Tmap.TMapTapi;
 
@@ -27,8 +28,10 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final String TAG = "CustomerListAdapter";
     private Context mContext;
     private List<RouteD> mRouteDs = new ArrayList<RouteD>();
+    private TMapTapi mTmap;
     private OnOrderBtnClickListener mOnOrderBtnClickListener;
     private OnTmapBtnClickListener mOnTmapBtnClickListener;
+    private HttpService mHttpService;
 
     public void setOnOrderBtnClickListener(final OnOrderBtnClickListener onOrderBtnClickListener) {
         mOnOrderBtnClickListener = onOrderBtnClickListener;
@@ -38,9 +41,11 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         mOnTmapBtnClickListener = onTmapBtnClickListener;
     }
 
-    public CustomerListAdapter(Context context, List<RouteD> routeDs) {
+    public CustomerListAdapter(Context context, List<RouteD> routeDs, TMapTapi tMapTapi, HttpService httpService) {
         mRouteDs = routeDs;
         mContext = context;
+        mTmap = tMapTapi;
+        mHttpService = httpService;
     }
 
     public static class OriginalViewHolder extends RecyclerView.ViewHolder {
@@ -61,7 +66,6 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             detail = (Button) v.findViewById(R.id.detail);
             tmap = (ImageView) v.findViewById(R.id.tmap);
             cardView = (CardView) v.findViewById(R.id.card);
-
         }
     }
 
@@ -100,16 +104,16 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             view.detail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(mOnOrderBtnClickListener != null) {
-                        mOnOrderBtnClickListener.onBtnClick(routeD.orderId);
+                    if (mOnOrderBtnClickListener != null) {
+                        mOnOrderBtnClickListener.onBtnClick(mHttpService, routeD.orderId, mContext);
                     }
                 }
             });
             view.tmap.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(mOnTmapBtnClickListener != null) {
-                        mOnTmapBtnClickListener.onItemClick(routeD);
+                    if (mOnTmapBtnClickListener != null) {
+                        mOnTmapBtnClickListener.onItemClick(routeD, mTmap, mContext);
                     }
                 }
             });
@@ -122,11 +126,11 @@ public class CustomerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public interface OnOrderBtnClickListener {
-        void onBtnClick(String orderId);
+        void onBtnClick(HttpService httpService, String orderId, Context context);
     }
 
     public interface OnTmapBtnClickListener {
-        void onItemClick(RouteD obj);
+        void onItemClick(RouteD obj, TMapTapi tmap, Context context);
     }
 
 }

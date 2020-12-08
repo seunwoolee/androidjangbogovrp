@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lyt_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     tools:context=".fragment.MainFragment">
 
         <LinearLayout
@@ -121,7 +122,9 @@
                                     android:layout_height="0dp"
                                     android:layout_weight="1" />
 
-                                <ImageView
+                                <ImageButton
+                                    style="@style/Widget.AppCompat.Button.Borderless"
+                                    android:background="@color/transparent"
                                     android:clickable="true"
                                     android:id="@+id/tmap"
                                     android:layout_width="@dimen/spacing_xmlarge"
@@ -129,7 +132,7 @@
                                     android:padding="@dimen/spacing_middle"
                                     app:srcCompat="@drawable/ic_directions_car"
                                     app:tint="@color/grey_60"
-                                    tools:ignore="VectorDrawableCompat"
+                                    tools:ignore="ContentDescription,VectorDrawableCompat"
                                     android:focusable="true" />
 
                             </LinearLayout>
