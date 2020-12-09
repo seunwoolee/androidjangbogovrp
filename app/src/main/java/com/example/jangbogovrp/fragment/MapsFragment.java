@@ -148,17 +148,18 @@ public class MapsFragment extends Fragment {
                 googleMap.setOnMarkerClickListener(onMarkerClickListener);
                 isDrawn = true;
 
-                FusedLocationProviderClient fusedLocationProviderClient = new FusedLocationProviderClient(context);
+                @SuppressLint("VisibleForTests") FusedLocationProviderClient fusedLocationProviderClient = new FusedLocationProviderClient(context);
                 Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
                 locationTask.addOnSuccessListener(location -> {
                     if (location != null) {
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getAltitude());
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12f));
                     }
                 });
             }
         }
     };
+
 
     @Override
     public void onAttach(@NonNull Context context) {

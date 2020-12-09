@@ -141,6 +141,4 @@ public class MainFragment extends Fragment {
         mTmap = new TMapTapi(mContext);
         mTmap.setSKTMapAuthentication("0de9ecde-b87c-404c-b7f8-be4ed7b85d4f");
     }
-
-
 }
